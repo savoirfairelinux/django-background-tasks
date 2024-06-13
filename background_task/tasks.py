@@ -306,7 +306,7 @@ def autodiscover():
     """
     Autodiscover tasks.py files in much the same way as admin app
     """
-    import imp
+    import importlib
     from django.conf import settings
 
     for app_config in apps.get_app_configs():
@@ -315,8 +315,9 @@ def autodiscover():
         except (AttributeError, ImportError):
             continue
         try:
-            imp.find_module('tasks', app_path)
-        except ImportError:
+            spec = importlib.util.find_spec('tasks', app_path)
+            spec.loader.load_module()
+        except (ImportError, AttributeError):
             continue
 
         import_module("%s.tasks" % app_config.name)
